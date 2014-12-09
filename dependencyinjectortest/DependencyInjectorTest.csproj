@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{790A613A-D370-46DF-B225-7972F8FB49D9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DependencyInjectorTest</RootNamespace>
+    <AssemblyName>DependencyInjectorTest</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <Compile Include="TestCases\BasicCreationTest.cs" />
+    <Compile Include="TestCases\CohesionTest.cs" />
+    <Compile Include="TestCases\NamespaceAddingTest.cs" />
+    <Compile Include="TestCases\OverrideInjectionTest.cs" />
+    <Compile Include="TestCases\PropertiesInjectionTest.cs" />
+    <Compile Include="TestCases\PropertiesSingletonTest.cs" />
+    <Compile Include="TestData\Dependency\CircularOne.cs" />
+    <Compile Include="TestData\Dependency\CircularTwo.cs" />
+    <Compile Include="TestData\Dependency\DeepDependantFour.cs" />
+    <Compile Include="TestData\Dependency\DeepDependantOne.cs" />
+    <Compile Include="TestData\Dependency\DeepDependantThree.cs" />
+    <Compile Include="TestData\Dependency\DeepDependantTwo.cs" />
+    <Compile Include="TestData\Dependency\DependantOne.cs" />
+    <Compile Include="TestData\Dependency\DependantThree.cs" />
+    <Compile Include="TestData\Dependency\DependantTwo.cs" />
+    <Compile Include="TestData\InjectableNamespace\InjectableInNamespaceOne.cs" />
+    <Compile Include="TestData\InjectableNamespace\InjectableInNamespaceSingleton.cs" />
+    <Compile Include="TestData\InjectableNamespace\InjectableInNamespaceThree.cs" />
+    <Compile Include="TestData\InjectableNamespace\InjectableInNamespaceTwo.cs" />
+    <Compile Include="TestData\Injectable\InjectableOne.cs" />
+    <Compile Include="TestData\Injectable\InjectableThree.cs" />
+    <Compile Include="TestData\Injectable\InjectableTwo.cs" />
+    <Compile Include="TestData\Injectable\InjectableWithSingletonAttribute.cs" />
+    <Compile Include="TestData\MixedInjections.cs" />
+    <Compile Include="TestData\NamespaceClasses\NamespaceAll.cs" />
+    <Compile Include="TestData\NamespaceClasses\NamespaceOne.cs" />
+    <Compile Include="TestData\PropertiesClasses\PropertyOne.cs" />
+    <Compile Include="TestData\PropertiesClasses\PropertyThree.cs" />
+    <Compile Include="TestData\PropertiesClasses\PropertyTwo.cs" />
+    <Compile Include="TestData\SimpleClasses\SimpleNoConstructor.cs" />
+    <Compile Include="TestData\SimpleClasses\SimpleOne.cs" />
+    <Compile Include="TestData\SimpleClasses\SimpleTakesSingleton.cs" />
+    <Compile Include="TestData\SimpleClasses\SimpleThree.cs" />
+    <Compile Include="TestData\SimpleClasses\SimpleTwo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestCases\SingletonTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DependencyInjector\DependencyInjector.csproj">
+      <Project>{1d8f3d5d-16ae-454f-a3b8-4aba49103b00}</Project>
+      <Name>DependencyInjector</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.CodedUITestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Extension, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITesting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
