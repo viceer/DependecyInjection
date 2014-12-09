@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DependencyInjectorTest.TestData.SimpleClasses;
 using DependencyInjectorTest.TestData.Injectable;
 using DependencyInjector;

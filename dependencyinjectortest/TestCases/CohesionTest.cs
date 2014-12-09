@@ -1,11 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DependencyInjectorTest.TestData.SimpleClasses;
 using DependencyInjectorTest.TestData.Injectable;
 using DependencyInjector;
-using DependencyInjectorTest.TestData.PropertiesClasses;
-using DependencyInjectorTest.TestData.NamespaceClasses;
-using DependencyInjectorTest.TestData.InjectableNamespace;
 using DependencyInjectorTest.TestData.Dependency;
 
 namespace DependencyInjectorTest
