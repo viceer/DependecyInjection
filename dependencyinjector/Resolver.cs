@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
 using DependencyInjector.Internals;
 
 /*
@@ -19,18 +14,18 @@ namespace DependencyInjector
 {
     public class Resolver
     {
-        InjectionsStorage _injections;
-        ConstructorsManager _constructors;
-        PropertiesManager _properties;
-        ObjectCreator _creator;
-        Registrator _registrator;
+        readonly InjectionsStorage _injections;
+        readonly ConstructorsManager _constructors;
+        readonly PropertiesManager _properties;
+        readonly ObjectCreator _creator;
+        readonly Registrator _registrator;
 
         public Resolver()
         {
             _injections = new InjectionsStorage();
             _registrator = new Registrator(_injections);
             _constructors = new ConstructorsManager(_injections);
-            _properties = new PropertiesManager(_injections);
+            _properties = new PropertiesManager();
             _creator = new ObjectCreator(_injections, _constructors, _properties);
         }
 

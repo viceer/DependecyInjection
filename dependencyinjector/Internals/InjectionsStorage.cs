@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DependencyInjector.Internals
 {
     internal class InjectionsStorage
     {
-        Dictionary<Type, Injection> _injections = new Dictionary<Type, Injection>();
+        readonly Dictionary<Type, Injection> _injections = new Dictionary<Type, Injection>();
 
         internal bool Contains(Type type)
         {

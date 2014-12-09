@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DependencyInjector.Internals
 {
     internal class CohesionChecker
     {
-        InjectionsStorage _storage;
-        ConstructorsManager _constructors;
-        PropertiesManager _properties;
+        readonly InjectionsStorage _storage;
+        readonly ConstructorsManager _constructors;
+        readonly PropertiesManager _properties;
 
         internal CohesionChecker(InjectionsStorage storage, ConstructorsManager constructors, PropertiesManager properties)
         {
@@ -30,52 +29,33 @@ namespace DependencyInjector.Internals
         {
             Parallel.ForEach (_storage.Injections, item =>
             {
-                if (!IsCovered(item.Value.Type))
-                {
-                    string error = string.Format("No Injection found for '{0}'", item.Value.Type);
-                    throw new ArgumentException(error);
-                }
+                if (IsCovered(item.Value.Type)) return;
+                var error = string.Format("No Injection found for '{0}'", item.Value.Type);
+                throw new ArgumentException(error);
             });
         }
 
         void CheckForCircularDependency()
         {
-            Parallel.ForEach(_storage.Injections, item =>
-            {
-                CheckRequiredTypes(item.Key, item.Key);
-            });
+            Parallel.ForEach(_storage.Injections, item => CheckRequiredTypes(item.Key, item.Key));
         }
 
         bool IsCovered(Type type)
         {
-            List<Type> requiredTypes = GetAllRequiredIntertfaces(type);
-            foreach (var neededType in requiredTypes)
-            {
-                if (!HasInjection(neededType))
-                {
-                    return false;
-                }
-            }
-            return true;
+            var requiredTypes = GetAllRequiredIntertfaces(type);
+            return requiredTypes.All(HasInjection);
         }
 
         bool HasInjection(Type type)
         {
-            foreach (var item in _storage.Injections)
-            {
-                if (type == item.Key)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return _storage.Injections.Any(item => type == item.Key);
         }
 
         void CheckRequiredTypes(Type inter, Type baseInterface)
         {
-            List<Type> requiredTypes = GetAllRequiredIntertfaces(ToBaseType(inter));
+            var requiredTypes = GetAllRequiredIntertfaces(ToBaseType(inter));
             ThrowIfContainsBaseType(requiredTypes, baseInterface);
-            foreach (Type requiredType in requiredTypes)
+            foreach (var requiredType in requiredTypes)
             {
                 CheckRequiredTypes(requiredType, baseInterface);
             }
@@ -83,27 +63,17 @@ namespace DependencyInjector.Internals
 
         void ThrowIfContainsBaseType(List<Type> types, Type baseType)
         {
-            if (types.Contains(baseType))
-            {
-                string error = string.Format("Circular Dependency found for '{0}'", baseType);
-                throw new ArgumentException(error);
-            }
+            if (!types.Contains(baseType)) return;
+            var error = string.Format("Circular Dependency found for '{0}'", baseType);
+            throw new ArgumentException(error);
         }
 
         List<Type> GetAllRequiredIntertfaces(Type type)
         {
-            var requiredTypes = new List<Type>();
             ConstructorInfo constructor = _constructors.GetConstructor(type);
-            foreach (var parameter in constructor.GetParameters())
-            {
-                requiredTypes.Add(parameter.ParameterType);
-            }
-
+            var requiredTypes = constructor.GetParameters().Select(parameter => parameter.ParameterType).ToList();
             var properties = _properties.GetSupportedProperties(type);
-            foreach (var property in properties)
-            {
-                requiredTypes.Add(property.PropertyType);
-            }
+            requiredTypes.AddRange(properties.Select(property => property.PropertyType));
 
             return requiredTypes;
         }

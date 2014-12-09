@@ -11,9 +11,9 @@ namespace DependencyInjector.Internals
 {
     internal class Registrator
     {
-        InjectionsStorage _storage;
-        ConcurrentDictionary<Type, Injection> _tempInjectionStorage = new ConcurrentDictionary<Type, Injection>();
-        Dictionary<string, Assembly> _tempAssembliesStorage = new Dictionary<string, Assembly>();
+        readonly InjectionsStorage _storage;
+        readonly ConcurrentDictionary<Type, Injection> _tempInjectionStorage = new ConcurrentDictionary<Type, Injection>();
+        readonly Dictionary<string, Assembly> _tempAssembliesStorage = new Dictionary<string, Assembly>();
         Injection _last;
 
         internal Registrator(InjectionsStorage storage)
@@ -34,33 +34,27 @@ namespace DependencyInjector.Internals
             _last.SingleInstance = true;
         }
 
-        internal void Add<I, C>(bool isSingleInstance) where C : class,I
+        internal void Add<T, TC>(bool isSingleInstance) where TC : class,T
         {
-            Type type = typeof(I);
-            Injection injection = new Injection { Type = typeof(C), SingleInstance = isSingleInstance };
+            var type = typeof(T);
+            var injection = new Injection { Type = typeof(TC), SingleInstance = isSingleInstance };
             AddUpdateTempInjection(type, injection);
-        }
-
-        internal void Add(Type from, Type to, bool isSingleInstance = false)
-        {
-            Injection injection = new Injection { Type = to, SingleInstance = isSingleInstance };
-            AddUpdateTempInjection(from, injection);
         }
 
         internal void ResolveAllFromNamespace<T>() where T : class
         {
-            Type type = typeof(T);
-            Assembly assembly = type.Assembly;
-            string name = type.Namespace;
+            var type = typeof(T);
+            var assembly = type.Assembly;
+            var name = type.Namespace;
             _tempAssembliesStorage.Add(name, assembly);
         }
 
         internal void ResolveAllFromNamespace(string name)
         {
-            Assembly assembly = null;
+            Assembly assembly;
             try
             {
-                string assemblyName = GetAssemblyNameFromFullNamespace(name);
+                var assemblyName = GetAssemblyNameFromFullNamespace(name);
                 assembly = Assembly.Load(assemblyName);
             }
             catch 
@@ -73,7 +67,7 @@ namespace DependencyInjector.Internals
         #region PRIVATE IMPLEMENTATION
         void AddUpdateTempInjection(Type type, Injection injection)
         {
-            Injection currentInjection = null;
+            Injection currentInjection;
             if (_tempInjectionStorage.TryGetValue(type, out currentInjection))
             {
                 if (injection.Type != currentInjection.Type)
@@ -84,13 +78,13 @@ namespace DependencyInjector.Internals
             }
             else
             {
-                injection.SingleInstance = HasSingletonArttribute(type) ? true : injection.SingleInstance;
+                injection.SingleInstance = HasSingletonArttribute(type) || injection.SingleInstance;
                 _tempInjectionStorage.GetOrAdd(type, injection);
                 _last = injection;
             }
         }
 
-        void UpdateSingleInstance(Injection current, Injection injection)
+        static void UpdateSingleInstance(Injection current, Injection injection)
         {
             if (injection.SingleInstance && !current.SingleInstance)
             {
@@ -98,7 +92,7 @@ namespace DependencyInjector.Internals
             }
         }
 
-        bool HasSingletonArttribute(Type type)
+        static bool HasSingletonArttribute(Type type)
         {
             return type.IsDefined(typeof(Singleton));
         }
@@ -113,10 +107,7 @@ namespace DependencyInjector.Internals
 
         void RegisterDataFromAssemblies()
         {
-            Parallel.ForEach (_tempAssembliesStorage, item =>
-            {
-                RegisterAssembly(item.Value, item.Key);
-            });
+            Parallel.ForEach (_tempAssembliesStorage, item => RegisterAssembly(item.Value, item.Key));
         }
         #endregion
 
@@ -124,18 +115,19 @@ namespace DependencyInjector.Internals
         void RegisterAssembly(Assembly assembly, string name)
         {
             var types = assembly.GetTypes().Where(t => t.Namespace == name);
-            var interfaces = types.Where(t => (t.IsInterface) && (t.Namespace == name)).ToArray();
+            var enumerableTypes = types as Type[] ?? types.ToArray();
+            var interfaces = enumerableTypes.Where(t => (t.IsInterface) && (t.Namespace == name)).ToArray();
             foreach (var inter in interfaces)
             {
                 if (FollowsInterfaceConvention(inter.Name))
                 {
                     string possibleClassName = GetClassNameFromInterface(inter.Name);
-                    var classes = types.Where(mytype => mytype.GetInterfaces().Contains(inter) && mytype.Name == possibleClassName).ToList();
+                    var classes = enumerableTypes.Where(mytype => mytype.GetInterfaces().Contains(inter) && mytype.Name == possibleClassName).ToList();
                     if (classes.Count > 1)
                     {
                         throw new AmbiguousMatchException(String.Format("Multiple classes found {0} interface.", inter.Name));
                     }
-                    else if (classes.Count == 1)
+                    if (classes.Count == 1)
                     {
                         AddUpdateTempInjection(inter, new Injection { Type = classes[0], SingleInstance = false });
                     }
@@ -143,18 +135,18 @@ namespace DependencyInjector.Internals
             }
         }
 
-        string GetAssemblyNameFromFullNamespace(string name)
+        static string GetAssemblyNameFromFullNamespace(string name)
         {
-            int index = name.IndexOf('.');
+            var index = name.IndexOf('.');
             return name.Substring(0, index == -1 ? name.Length : index);
         }
 
-        bool FollowsInterfaceConvention(string name)
+        static bool FollowsInterfaceConvention(string name)
         {
             return name.StartsWith("I") && name.Length > 1;
         }
 
-        string GetClassNameFromInterface(string name)
+        static string GetClassNameFromInterface(string name)
         {
             return name.Substring(1);
         }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using DependencyInjector.Attributes;
 using System.Collections.Concurrent;
@@ -11,13 +9,7 @@ namespace DependencyInjector.Internals
 {
     internal class PropertiesManager
     {
-        ConcurrentDictionary<Type, List<PropertyInfo>> _cacheSupportedProperties = new ConcurrentDictionary<Type, List<PropertyInfo>>();
-        InjectionsStorage _injections;
-
-        internal PropertiesManager(InjectionsStorage storage)
-        {
-            _injections = storage;
-        }
+        readonly ConcurrentDictionary<Type, List<PropertyInfo>> _cacheSupportedProperties = new ConcurrentDictionary<Type, List<PropertyInfo>>();
 
         internal List<PropertyInfo> GetSupportedProperties(Type type)
         {
@@ -31,20 +23,7 @@ namespace DependencyInjector.Internals
             return supportedProperties;
         }
 
-        bool IsSupportedInjection(PropertyInfo property)
-        {
-            if (property.GetSetMethod(false) == null)
-            {
-                return false;
-            }
-            if (!property.PropertyType.IsInterface)
-            {
-                return false;
-            }
-            return _injections.Contains(property.PropertyType);
-        }
-        
-        List<PropertyInfo> CreateSupportedProperties(Type type)
+        static List<PropertyInfo> CreateSupportedProperties(Type type)
         {
             return type.GetProperties()
                 .Where(prop => Attribute.IsDefined(prop, typeof(Injectable)))

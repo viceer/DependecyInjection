@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 
 namespace DependencyInjector.Internals
 {
     internal class ObjectCreator
     {
-        ConstructorsManager _constructors;
-        PropertiesManager _properties;
-        InjectionsStorage _injections;
-        SingleInstancesManager _singleInstances;
+        readonly ConstructorsManager _constructors;
+        readonly PropertiesManager _properties;
+        readonly InjectionsStorage _injections;
+        readonly SingleInstancesManager _singleInstances;
 
         internal ObjectCreator(InjectionsStorage storage, ConstructorsManager constructors, PropertiesManager properties)
         {
@@ -25,15 +22,15 @@ namespace DependencyInjector.Internals
         #region PUBLIC METHODS
         internal object Create(Type type)
         {
-            ConstructorInfo constructor = _constructors.GetConstructor(type);
-            List<object> parameters = CreateInjectableParamethers(constructor);
+            var constructor = _constructors.GetConstructor(type);
+            var parameters = CreateInjectableParamethers(constructor);
             var obj = Activator.CreateInstance(type, parameters.ToArray(), null);
             return obj;
         }
 
         internal object Create(Type type, dynamic constructorParamethers)
         {
-            ConstructorInfo constructor = _constructors.GetConstructor(type);
+            var constructor = _constructors.GetConstructor(type);
             AnonymousTypesHelper.CheckThrow(constructor, constructorParamethers);
             List<object> parameters = CreateInjectableParamethers(constructor, constructorParamethers);
             var obj = Activator.CreateInstance(type, parameters.ToArray(), null);
@@ -42,7 +39,7 @@ namespace DependencyInjector.Internals
 
         internal void InjectProperties(Object obj)
         {
-            Type type = obj.GetType();
+            var type = obj.GetType();
             var properties = _properties.GetSupportedProperties(type);
             var values = CreateInjectableObjects(properties);
             SetProperties(obj, properties, values);
@@ -50,7 +47,7 @@ namespace DependencyInjector.Internals
 
         internal void InjectProperties(Object obj, dynamic customProperties)
         {
-            Type type = obj.GetType();
+            var type = obj.GetType();
             var supportedProperties = _properties.GetSupportedProperties(type);
             AnonymousTypesHelper.CheckThrow(supportedProperties, customProperties);
             Object[] values = CreateInjectableObjects(supportedProperties, customProperties);
@@ -60,29 +57,22 @@ namespace DependencyInjector.Internals
 
         object Get(Type type)
         {
-            Injection injection = _injections.GetInjection(type);
+            var injection = _injections.GetInjection(type);
             if (injection.SingleInstance)
             {
                 object instance = null;
-                if (_singleInstances.TryGetValue(type, out instance))
-                {
-                    return instance;
-                }
-                return CreateSingleton(type, injection);
+                return _singleInstances.TryGetValue(type, out instance) ? instance : CreateSingleton(type, injection);
             }
-            else
-            {
-                Object obj = Create(injection.Type);
-                InjectProperties(obj);
-                return obj;
-            }
+            var obj = Create(injection.Type);
+            InjectProperties(obj);
+            return obj;
         }
 
-        Object _singletonCreationLocker = new Object();
+        readonly Object _singletonCreationLocker = new Object();
 
         object CreateSingleton(Type type, Injection injection)
         {
-            object instance = null;
+            object instance;
             lock (_singletonCreationLocker)
             {
                 if (_singleInstances.TryGetValue(type, out instance))
@@ -95,9 +85,9 @@ namespace DependencyInjector.Internals
             return instance;
         }
 
-        void SetProperties(Object obj, List<PropertyInfo> properties, Object[] values)
+        static void SetProperties(Object obj, List<PropertyInfo> properties, Object[] values)
         {
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
                 properties[i].SetValue(obj, values[i]);
             }
@@ -106,8 +96,8 @@ namespace DependencyInjector.Internals
         List<object> CreateInjectableParamethers(ConstructorInfo constructor)
         {
             var paramsList = new List<object>();
-            ParameterInfo[] paramethers = constructor.GetParameters();
-            for (int i = 0; i < paramethers.Length; i++)
+            var paramethers = constructor.GetParameters();
+            for (var i = 0; i < paramethers.Length; i++)
             {
                 paramsList.Add(Get(paramethers[i].ParameterType));
             }
@@ -118,7 +108,7 @@ namespace DependencyInjector.Internals
         {
             var paramsList = new List<object>();
             var paramethers = constructor.GetParameters();
-            for (int i = 0; i < paramethers.Length; i++)
+            for (var i = 0; i < paramethers.Length; i++)
             {
                 if (AnonymousTypesHelper.ShouldOverride(paramethers[i].Name, constructorParamethers))
                 {
@@ -134,7 +124,7 @@ namespace DependencyInjector.Internals
 
         Object[] CreateInjectableObjects(List<PropertyInfo> properties)
         {
-            Object[] values = new Object[properties.Count];
+            var values = new Object[properties.Count];
             for (int i = 0; i < properties.Count; i++)
             {
                 values[i] = Get(properties[i].PropertyType);
@@ -144,20 +134,13 @@ namespace DependencyInjector.Internals
 
         Object[] CreateInjectableObjects(List<PropertyInfo> properties, dynamic customProperties)
         {
-            if (customProperties != null)
-            {
-                return CreateUpdateInjectableObjects(properties, customProperties);
-            }
-            else
-            {
-                return CreateInjectableObjects(properties);
-            }
+            return customProperties != null ? CreateUpdateInjectableObjects(properties, customProperties) : CreateInjectableObjects(properties);
         }
 
         Object[] CreateUpdateInjectableObjects(List<PropertyInfo> properties, dynamic customProperties)
         {
-            Object[] objects = new Object[properties.Count];
-            for (int i = 0; i < objects.Length; i++)
+            var objects = new Object[properties.Count];
+            for (var i = 0; i < objects.Length; i++)
             {
                 if (AnonymousTypesHelper.ShouldOverride(properties[i].Name, customProperties))
                 {

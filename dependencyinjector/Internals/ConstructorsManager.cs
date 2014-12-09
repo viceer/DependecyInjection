@@ -10,8 +10,8 @@ namespace DependencyInjector.Internals
 {
     internal class ConstructorsManager
     {
-        ConcurrentDictionary<Type, ConstructorInfo> _cacheConstructors = new ConcurrentDictionary<Type, ConstructorInfo>();
-        InjectionsStorage _injections;
+        readonly ConcurrentDictionary<Type, ConstructorInfo> _cacheConstructors = new ConcurrentDictionary<Type, ConstructorInfo>();
+        readonly InjectionsStorage _injections;
 
         internal ConstructorsManager(InjectionsStorage storage)
         {
@@ -33,20 +33,18 @@ namespace DependencyInjector.Internals
 
         ConstructorInfo CreateConstructor(Type type)
         {
-            ConstructorInfo[] constructors = type.GetConstructors();
-            int index = -1;
-            for (int i = 0; i < constructors.Length; i++)
+            var constructors = type.GetConstructors();
+            var index = -1;
+            for (var i = 0; i < constructors.Length; i++)
             {
-                if (constructors[i].GetParameters().Length != 0)
+                if (constructors[i].GetParameters().Length == 0) continue;
+                if (index != -1)
                 {
-                    if (index != -1)
-                    {
-                        throw new AmbiguousMatchException(String.Format("Multiple constructors with parameters found for {0} type.", type));
-                    }
-                    index = i;
+                    throw new AmbiguousMatchException(String.Format("Multiple constructors with parameters found for {0} type.", type));
                 }
+                index = i;
             }
-            ConstructorInfo constructor = constructors[(index != -1) ? index : 0];
+            var constructor = constructors[(index != -1) ? index : 0];
             if (!IsAplicable(constructor))
             {
                 throw new ArgumentException(String.Format("No aprpriate constructor found for {0} type.", type));
@@ -57,7 +55,7 @@ namespace DependencyInjector.Internals
         bool IsAplicable(ConstructorInfo constructor)
         {
             var paramethers = constructor.GetParameters();
-            for (int i = 0; i < paramethers.Length; i++)
+            for (var i = 0; i < paramethers.Length; i++)
             {
                 if (!_injections.Contains(paramethers[i].ParameterType))
                 {
@@ -69,7 +67,7 @@ namespace DependencyInjector.Internals
 
         Type ToInjectableType(Type type)
         {
-            Type injectable = type;
+            var injectable = type;
             if (type.IsInterface)
             {
                 injectable = _injections.GetInjection(type).Type;
