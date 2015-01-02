@@ -4,6 +4,12 @@ using DependencyInjector.Internals;
 /*
  TO DO: 
  * 
+ * refactor registration
+ * IDisposable
+ * safe singleton pattern
+ * inject collections
+ * 
+ * 
  * ensure correct mapping for multi app pools
  * 
  * ? custom naming conventions
@@ -31,32 +37,13 @@ namespace DependencyInjector
 
         public T Resolve<T>() where T : class
         {
-            T cretedObject = (T)_creator.Create(typeof(T));
-            ResolveProperties(cretedObject);
+            T cretedObject = (T)_creator.Get(typeof(T));
             return cretedObject;
         }
 
         public T Resolve<T>(dynamic constructorParamethers = null, dynamic customProperties = null) where T : class
         {
-            T cretedObject;
-            if (constructorParamethers == null)
-            {
-                cretedObject = (T)_creator.Create(typeof(T));               
-            }
-            else
-            {
-                cretedObject = (T)_creator.Create(typeof(T), constructorParamethers);
-            }
-
-            if (customProperties == null)
-            {
-                ResolveProperties(cretedObject);
-            }
-            else
-            {
-                ResolveProperties(cretedObject, customProperties);
-            }         
-            return cretedObject;
+            return (T)_creator.Get(typeof(T), constructorParamethers, customProperties);
         }
 
         public void ResolveProperties(Object obj)

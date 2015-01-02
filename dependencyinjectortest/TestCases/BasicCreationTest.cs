@@ -94,5 +94,18 @@ namespace DependencyInjectorTest
                 Assert.Fail(string.Format("Unexpected exception of type {0} caught: {1}", e.GetType(), e.Message));
             }
         }
+
+        [TestMethod]
+        public void DirectResolve()
+        {
+            var injector = new Resolver()
+                .Register<IInjectableOne, InjectableOne>()
+                .ExecuteAllRegistrations();
+
+            var testClass = injector.Resolve<IInjectableOne>();
+
+            Assert.IsNotNull(testClass);
+            Assert.AreEqual(testClass.GetType(), typeof(InjectableOne));
+        }
     }
 }

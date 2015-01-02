@@ -31,6 +31,16 @@ namespace DependencyInjector.Internals
             return injection;
         }
 
+        internal bool IsIsngleton(Type type)
+        {
+            Injection injection;
+            if (!_injections.TryGetValue(type, out injection))
+            {
+                return false;
+            }
+            return injection.SingleInstance;
+        }
+
         internal Dictionary<Type, Injection> Injections { get { return _injections; } }
     }
 }

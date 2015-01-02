@@ -55,22 +55,46 @@ namespace DependencyInjector.Internals
         }
         #endregion
 
-        object Get(Type type)
+        internal object Get(Type type, dynamic constructorParamethers = null, dynamic customProperties = null)
         {
-            var injection = _injections.GetInjection(type);
-            if (injection.SingleInstance)
+            var obj = GetSingleton(type);
+            if (obj != null) { return obj; }
+            Type typeToCreate = type.IsInterface ? _injections.GetInjection(type).Type : type;
+
+            if (constructorParamethers == null)
+            {
+                obj = Create(typeToCreate);
+            }
+            else
+            {
+                obj = Create(typeToCreate, constructorParamethers);
+            }
+
+            if (customProperties == null)
+            { 
+                InjectProperties(obj); 
+            }
+            else 
+            { 
+                InjectProperties(obj, customProperties); 
+            }
+
+            return obj;
+        }
+
+        object GetSingleton(Type type)
+        {
+            if (_injections.IsIsngleton(type))
             {
                 object instance = null;
-                return _singleInstances.TryGetValue(type, out instance) ? instance : CreateSingleton(type, injection);
+                return _singleInstances.TryGetValue(type, out instance) ? instance : CreateSingleton(type);
             }
-            var obj = Create(injection.Type);
-            InjectProperties(obj);
-            return obj;
+            return null;
         }
 
         readonly Object _singletonCreationLocker = new Object();
 
-        object CreateSingleton(Type type, Injection injection)
+        object CreateSingleton(Type type)
         {
             object instance;
             lock (_singletonCreationLocker)
@@ -79,6 +103,7 @@ namespace DependencyInjector.Internals
                 {
                     return instance;
                 }
+                var injection = _injections.GetInjection(type);
                 instance = Create(injection.Type);
                 _singleInstances.RegisterSingleInstance(type, instance);
             }

@@ -37,5 +37,20 @@ namespace DependencyInjectorTest.TestData
 
             Assert.AreNotSame(testClass.InjectableOne, testClass2.InjectableOne);
         }
+
+        [TestMethod]
+        public void DirectResolveSingleton()
+        {
+            var injector = new Resolver()
+                .Register<IInjectableWithSingletonAttribute, InjectableWithSingletonAttribute>()
+                .ExecuteAllRegistrations();
+
+            var testClass = injector.Resolve<IInjectableWithSingletonAttribute>();
+            var testClass2 = injector.Resolve<IInjectableWithSingletonAttribute>();
+
+            Assert.IsNotNull(testClass);
+
+            Assert.AreSame(testClass, testClass2);
+        }
     }
 }
