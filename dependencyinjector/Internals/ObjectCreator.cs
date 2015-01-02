@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace DependencyInjector.Internals
 {
-    internal class ObjectCreator
+    internal class ObjectCreator : IDisposable
     {
         readonly ConstructorsManager _constructors;
         readonly PropertiesManager _properties;
@@ -177,6 +177,11 @@ namespace DependencyInjector.Internals
                 }
             }
             return objects;
+        }
+
+        public void Dispose()
+        {
+            _singleInstances.Dispose();
         }
     }
 }

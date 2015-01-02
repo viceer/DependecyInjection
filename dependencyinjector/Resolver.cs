@@ -18,7 +18,7 @@ using DependencyInjector.Internals;
 
 namespace DependencyInjector
 {
-    public class Resolver
+    public class Resolver: IDisposable
     {
         readonly InjectionsStorage _injections;
         readonly ConstructorsManager _constructors;
@@ -91,6 +91,11 @@ namespace DependencyInjector
             var cohesionChecker = new CohesionChecker(_injections, _constructors, _properties);
             cohesionChecker.CheckCohesion();
             return this;
+        }
+
+        public void Dispose()
+        {
+            _creator.Dispose();
         }
     }
 }
