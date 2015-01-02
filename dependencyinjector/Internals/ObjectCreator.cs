@@ -105,6 +105,7 @@ namespace DependencyInjector.Internals
                 }
                 var injection = _injections.GetInjection(type);
                 instance = Create(injection.Type);
+                System.Threading.Thread.MemoryBarrier();
                 _singleInstances.RegisterSingleInstance(type, instance);
             }
             return instance;

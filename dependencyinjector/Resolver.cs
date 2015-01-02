@@ -5,8 +5,6 @@ using DependencyInjector.Internals;
  TO DO: 
  * 
  * refactor registration
- * IDisposable
- * safe singleton pattern
  * inject collections
  * 
  * 
